@@ -12,6 +12,7 @@ import {
   ArrowLeft, Sun, Moon, Upload, FileText, CheckCircle2, AlertCircle, Database,
 } from "lucide-react";
 import { importarEscala, importarPacotes } from "../lib/csvImport";
+import { useIsMobile } from "../lib/useMedia";
 
 const KEY_FORNECED  = "escala_fornecedores";
 const KEY_ALOCACOES = "escala_alocacoes";
@@ -24,6 +25,8 @@ export default function ImportCSV({ onBack, T, darkMode, setDarkMode }) {
   const [sucesso, setSucesso] = useState("");
   const [funcoes, setFuncoes] = useState(FUNCOES);
   const [fornecedoresAtuais, setFornecedoresAtuais] = useState(FORNECEDORES);
+  const isMobile = useIsMobile();
+  const padX = isMobile ? 14 : 32;
 
   useEffect(() => {
     async function load() {
@@ -119,14 +122,23 @@ export default function ImportCSV({ onBack, T, darkMode, setDarkMode }) {
 
   return (
     <div style={{minHeight:"100vh",background:T.bg,color:T.text,display:"flex"}}>
-      <aside style={sidebarStyle(T)}>
-        <button onClick={onBack} title="Voltar" style={backBtn()}><ArrowLeft size={18} strokeWidth={2.25}/></button>
-        <div style={{flex:1}}/>
-        <IconButton icon={darkMode ? Sun : Moon} onClick={()=>setDarkMode(d=>!d)} size={40} T={T}/>
-      </aside>
+      {!isMobile && (
+        <aside style={sidebarStyle(T)}>
+          <button onClick={onBack} title="Voltar" style={backBtn()}><ArrowLeft size={18} strokeWidth={2.25}/></button>
+          <div style={{flex:1}}/>
+          <IconButton icon={darkMode ? Sun : Moon} onClick={()=>setDarkMode(d=>!d)} size={40} T={T}/>
+        </aside>
+      )}
 
       <div style={{flex:1, minWidth:0, paddingBottom:40}}>
-        <div style={{background:T.surface, borderBottom:`1px solid ${T.border}`, padding:"20px 32px"}}>
+        {isMobile && (
+          <div style={mobileBarStyle(T)}>
+            <button onClick={onBack} title="Voltar" style={mobileBackBtn()}><ArrowLeft size={18} strokeWidth={2.25}/></button>
+            <div style={{flex:1}}/>
+            <IconButton icon={darkMode ? Sun : Moon} onClick={()=>setDarkMode(d=>!d)} size={38} T={T}/>
+          </div>
+        )}
+        <div style={{background:T.surface, borderBottom:`1px solid ${T.border}`, padding:`${isMobile?14:20}px ${padX}px`}}>
           <div style={{display:"flex", gap:14, alignItems:"center"}}>
             <div style={{
               width:42, height:42, borderRadius:12,
@@ -143,7 +155,7 @@ export default function ImportCSV({ onBack, T, darkMode, setDarkMode }) {
           </div>
         </div>
 
-        <div style={{padding:"24px 32px", display:"flex", flexDirection:"column", gap:20}}>
+        <div style={{padding:`${isMobile?16:24}px ${padX}px`, display:"flex", flexDirection:"column", gap:20}}>
           <Card T={T}>
             <SectionHeader T={T} title="Etapa 1 — Entrada" subtitle="Salve a planilha como CSV (separador vírgula) e cole aqui" icon={FileText}/>
             <div style={{padding:16, display:"flex", flexDirection:"column", gap:12}}>
@@ -201,7 +213,7 @@ export default function ImportCSV({ onBack, T, darkMode, setDarkMode }) {
               <Card T={T}>
                 <SectionHeader T={T} title="Etapa 2 — Preview" subtitle="Conferir antes de aplicar" icon={Database}
                   right={<Button T={T} icon={CheckCircle2} onClick={aplicar}>Aplicar importação</Button>}/>
-                <div style={{padding:16, display:"grid", gridTemplateColumns:"1fr 1fr", gap:16}}>
+                <div style={{padding:16, display:"grid", gridTemplateColumns:isMobile?"1fr":"1fr 1fr", gap:16}}>
                   <div>
                     <h4 style={{color:T.textMd, fontSize:11, fontWeight:700, letterSpacing:"0.08em", textTransform:"uppercase", margin:"0 0 8px"}}>Alocações ({preview.alocacoes.length})</h4>
                     <div style={{maxHeight:260, overflowY:"auto", border:`1px solid ${T.border}`, borderRadius:8}}>
@@ -235,6 +247,17 @@ export default function ImportCSV({ onBack, T, darkMode, setDarkMode }) {
   );
 }
 
+const mobileBarStyle = (T) => ({
+  position:"sticky", top:0, zIndex:20,
+  background: T.gradSidebar, borderBottom:`1px solid rgba(255,255,255,0.06)`,
+  padding:"8px 12px", display:"flex", alignItems:"center", gap:8,
+});
+const mobileBackBtn = () => ({
+  width:40, height:40, borderRadius:10, border:"none", cursor:"pointer",
+  background:"linear-gradient(135deg,#059669,#10b981)",
+  color:"#fff", display:"flex", alignItems:"center", justifyContent:"center",
+  boxShadow:"0 4px 12px rgba(16,185,129,0.35)",
+});
 const sidebarStyle = (T) => ({
   width:72, minHeight:"100vh", background: T.gradSidebar,
   borderRight:"1px solid rgba(255,255,255,0.06)",

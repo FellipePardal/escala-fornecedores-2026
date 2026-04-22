@@ -14,6 +14,7 @@ import {
   MessageCircle, Save, X, LayoutGrid, List, Filter, Activity,
 } from "lucide-react";
 import { whatsappLink, mesDeISO } from "../lib/escala";
+import { useIsMobile } from "../lib/useMedia";
 
 const KEY_FORNECED  = "escala_fornecedores";
 const KEY_FUNCOES   = "escala_funcoes";
@@ -35,6 +36,8 @@ export default function Fornecedores({ onBack, T, darkMode, setDarkMode }) {
   const [filtroFunc, setFiltroFunc] = useState("todas");
   const [filtroTipo, setFiltroTipo] = useState("todos");
   const [filtroGrupo, setFiltroGrupo] = useState("transmissao");
+  const isMobile = useIsMobile();
+  const padX = isMobile ? 14 : 32;
   const [modo, setModo] = useState("cards"); // cards | tabela
   const [edit, setEdit] = useState(null);
 
@@ -132,14 +135,23 @@ export default function Fornecedores({ onBack, T, darkMode, setDarkMode }) {
 
   return (
     <div style={{minHeight:"100vh",background:T.bg,color:T.text,display:"flex"}}>
-      <aside style={sidebarStyle(T)}>
-        <button onClick={onBack} title="Voltar" style={backBtn()}><ArrowLeft size={18} strokeWidth={2.25}/></button>
-        <div style={{flex:1}}/>
-        <IconButton icon={darkMode ? Sun : Moon} onClick={()=>setDarkMode(d=>!d)} size={40} T={T}/>
-      </aside>
+      {!isMobile && (
+        <aside style={sidebarStyle(T)}>
+          <button onClick={onBack} title="Voltar" style={backBtn()}><ArrowLeft size={18} strokeWidth={2.25}/></button>
+          <div style={{flex:1}}/>
+          <IconButton icon={darkMode ? Sun : Moon} onClick={()=>setDarkMode(d=>!d)} size={40} T={T}/>
+        </aside>
+      )}
 
       <div style={{flex:1, minWidth:0, paddingBottom:40}}>
-        <div style={{background:T.surface, borderBottom:`1px solid ${T.border}`, padding:"20px 32px"}}>
+        {isMobile && (
+          <div style={mobileBarStyle(T)}>
+            <button onClick={onBack} title="Voltar" style={mobileBackBtn()}><ArrowLeft size={18} strokeWidth={2.25}/></button>
+            <div style={{flex:1}}/>
+            <IconButton icon={darkMode ? Sun : Moon} onClick={()=>setDarkMode(d=>!d)} size={38} T={T}/>
+          </div>
+        )}
+        <div style={{background:T.surface, borderBottom:`1px solid ${T.border}`, padding:`${isMobile?14:20}px ${padX}px`}}>
           <div style={{display:"flex", justifyContent:"space-between", alignItems:"flex-start", gap:16, flexWrap:"wrap"}}>
             <div style={{display:"flex", gap:14, alignItems:"center"}}>
               <div style={{
@@ -180,7 +192,7 @@ export default function Fornecedores({ onBack, T, darkMode, setDarkMode }) {
           </div>
         </div>
 
-        <div style={{padding:"24px 32px"}}>
+        <div style={{padding:`${isMobile?16:24}px ${padX}px`}}>
           {/* Filtros linha */}
           <div style={{display:"flex", gap:12, flexWrap:"wrap", marginBottom:20, alignItems:"center"}}>
             <div style={{display:"flex", alignItems:"center", gap:8, background:T.surface, border:`1px solid ${T.border}`, borderRadius:RADIUS.md, padding:"8px 12px", minWidth:260}}>
@@ -425,6 +437,17 @@ const inpStyle = (T) => ({
 const actBtn = (T) => ({
   width:28, height:28, border:`1px solid ${T.border}`, borderRadius:6, background:T.surface,
   color:T.textMd, cursor:"pointer", display:"inline-flex", alignItems:"center", justifyContent:"center",
+});
+const mobileBarStyle = (T) => ({
+  position:"sticky", top:0, zIndex:20,
+  background: T.gradSidebar, borderBottom:`1px solid rgba(255,255,255,0.06)`,
+  padding:"8px 12px", display:"flex", alignItems:"center", gap:8,
+});
+const mobileBackBtn = () => ({
+  width:40, height:40, borderRadius:10, border:"none", cursor:"pointer",
+  background:"linear-gradient(135deg,#059669,#10b981)",
+  color:"#fff", display:"flex", alignItems:"center", justifyContent:"center",
+  boxShadow:"0 4px 12px rgba(16,185,129,0.35)",
 });
 const sidebarStyle = (T) => ({
   width:72, minHeight:"100vh", background: T.gradSidebar,

@@ -19,6 +19,7 @@ import {
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid,
 } from "recharts";
+import { useIsMobile } from "../lib/useMedia";
 
 const KEY_FORNECED  = "escala_fornecedores";
 const KEY_FUNCOES   = "escala_funcoes";
@@ -38,6 +39,8 @@ export default function Analise({ onBack, T, darkMode, setDarkMode }) {
   const [loading, setLoading] = useState(true);
   const [mesFiltro, setMesFiltro] = useState("todos");
   const [view, setView] = useState("recomendacoes"); // recomendacoes | detalhes
+  const isMobile = useIsMobile();
+  const padX = isMobile ? 14 : 32;
 
   useEffect(() => {
     async function load() {
@@ -101,14 +104,23 @@ export default function Analise({ onBack, T, darkMode, setDarkMode }) {
 
   return (
     <div style={{minHeight:"100vh",background:T.bg,color:T.text,display:"flex"}}>
-      <aside style={sidebarStyle(T)}>
-        <button onClick={onBack} title="Voltar" style={backBtn()}><ArrowLeft size={18} strokeWidth={2.25}/></button>
-        <div style={{flex:1}}/>
-        <IconButton icon={darkMode ? Sun : Moon} onClick={()=>setDarkMode(d=>!d)} size={40} T={T}/>
-      </aside>
+      {!isMobile && (
+        <aside style={sidebarStyle(T)}>
+          <button onClick={onBack} title="Voltar" style={backBtn()}><ArrowLeft size={18} strokeWidth={2.25}/></button>
+          <div style={{flex:1}}/>
+          <IconButton icon={darkMode ? Sun : Moon} onClick={()=>setDarkMode(d=>!d)} size={40} T={T}/>
+        </aside>
+      )}
 
       <div style={{flex:1, minWidth:0, paddingBottom:40}}>
-        <div style={{background:T.surface, borderBottom:`1px solid ${T.border}`, padding:"20px 32px"}}>
+        {isMobile && (
+          <div style={mobileBarStyle(T)}>
+            <button onClick={onBack} title="Voltar" style={mobileBackBtn()}><ArrowLeft size={18} strokeWidth={2.25}/></button>
+            <div style={{flex:1}}/>
+            <IconButton icon={darkMode ? Sun : Moon} onClick={()=>setDarkMode(d=>!d)} size={38} T={T}/>
+          </div>
+        )}
+        <div style={{background:T.surface, borderBottom:`1px solid ${T.border}`, padding:`${isMobile?14:20}px ${padX}px`}}>
           <div style={{display:"flex", gap:14, alignItems:"center"}}>
             <div style={{
               width:42, height:42, borderRadius:12,
@@ -127,7 +139,7 @@ export default function Analise({ onBack, T, darkMode, setDarkMode }) {
           </div>
         </div>
 
-        <div style={{padding:"24px 32px"}}>
+        <div style={{padding:`${isMobile?16:24}px ${padX}px`}}>
           {linhas.length === 0 ? (
             <Card T={T}>
               <EmptyState T={T} icon={TrendingUp}
@@ -409,6 +421,17 @@ const thStyle = (T, align="left") => ({
   borderBottom:`1px solid ${T.border}`,
 });
 const tdStyle = (T) => ({ padding:"11px 12px", fontSize:12.5, color:T.text });
+const mobileBarStyle = (T) => ({
+  position:"sticky", top:0, zIndex:20,
+  background: T.gradSidebar, borderBottom:`1px solid rgba(255,255,255,0.06)`,
+  padding:"8px 12px", display:"flex", alignItems:"center", gap:8,
+});
+const mobileBackBtn = () => ({
+  width:40, height:40, borderRadius:10, border:"none", cursor:"pointer",
+  background:"linear-gradient(135deg,#059669,#10b981)",
+  color:"#fff", display:"flex", alignItems:"center", justifyContent:"center",
+  boxShadow:"0 4px 12px rgba(16,185,129,0.35)",
+});
 const sidebarStyle = (T) => ({
   width:72, minHeight:"100vh", background: T.gradSidebar,
   borderRight:"1px solid rgba(255,255,255,0.06)",

@@ -8,6 +8,7 @@ import { MODULOS, FUNCOES, FORNECEDORES, PROJETOS } from "../data/seed";
 import { Card, Stat, Button, Badge, IconButton } from "./ui";
 import { EmptyState, Avatar } from "./ui/Toast";
 import { getState, supabase, supabaseConfigured } from "../lib/supabase";
+import { useIsMobile } from "../lib/useMedia";
 import {
   LayoutDashboard, Sun, Moon, ArrowRight, Activity, Calendar,
   Users, TrendingUp, Upload, Clock, Zap, Target, AlertTriangle, DollarSign,
@@ -90,6 +91,8 @@ export default function Home({ onEnter, T, darkMode, setDarkMode }) {
   }, [alocMes, fornecedores, funcoes]);
 
   const semDados = alocacoes.length === 0;
+  const isMobile = useIsMobile();
+  const padX = isMobile ? 14 : 32;
 
   return (
     <div style={{ minHeight: "100vh", background: T.bg, color: T.text }}>
@@ -97,7 +100,7 @@ export default function Home({ onEnter, T, darkMode, setDarkMode }) {
       <header style={{
         background: T.surface || T.card,
         borderBottom: `1px solid ${T.border}`,
-        padding: "16px 32px",
+        padding: `12px ${padX}px`,
         display: "flex", justifyContent: "space-between", alignItems: "center",
         gap: 16, flexWrap: "wrap",
         position: "sticky", top: 0, zIndex: 10,
@@ -136,13 +139,13 @@ export default function Home({ onEnter, T, darkMode, setDarkMode }) {
       </header>
 
       {/* ── Hero de status ─────────────────────────────────────────────── */}
-      <main style={{ padding: "28px 32px 48px", maxWidth: 1320, margin: "0 auto" }}>
+      <main style={{ padding: `${isMobile?18:28}px ${padX}px 40px`, maxWidth: 1320, margin: "0 auto" }}>
         <div style={{
           background: T.gradHeader || T.surface,
           border: `1px solid ${T.border}`,
           borderRadius: RADIUS.xl,
-          padding: "28px 32px",
-          marginBottom: 24,
+          padding: isMobile ? "20px 18px" : "28px 32px",
+          marginBottom: 20,
           position: "relative",
           overflow: "hidden",
         }}>
@@ -155,7 +158,7 @@ export default function Home({ onEnter, T, darkMode, setDarkMode }) {
           <div style={{position:"relative", display:"flex", justifyContent:"space-between", alignItems:"flex-end", flexWrap:"wrap", gap:20}}>
             <div>
               <p style={{color:T.brand, fontSize:11, fontWeight:700, letterSpacing:"0.16em", textTransform:"uppercase", margin:"0 0 8px"}}>Semana de hoje</p>
-              <h2 style={{fontSize:32, fontWeight:800, margin:"0 0 6px", letterSpacing:"-0.025em", color:T.text}}>
+              <h2 style={{fontSize:isMobile?20:32, fontWeight:800, margin:"0 0 6px", letterSpacing:"-0.025em", color:T.text}}>
                 {new Date(hoje).toLocaleDateString("pt-BR", { weekday:"long", day:"2-digit", month:"long" })}
               </h2>
               <p style={{color:T.textMd, fontSize:14, margin:0}}>
@@ -185,7 +188,7 @@ export default function Home({ onEnter, T, darkMode, setDarkMode }) {
         </div>
 
         {/* Dois painéis: Hoje + Módulos */}
-        <div style={{display:"grid", gridTemplateColumns:"1fr 1fr", gap:20, marginBottom:28}}>
+        <div style={{display:"grid", gridTemplateColumns:isMobile?"1fr":"1fr 1fr", gap:16, marginBottom:24}}>
           {/* Hoje */}
           <Card T={T}>
             <div style={{padding:"18px 20px", borderBottom:`1px solid ${T.border}`, display:"flex", justifyContent:"space-between", alignItems:"center"}}>

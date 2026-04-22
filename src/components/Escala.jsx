@@ -17,6 +17,7 @@ import {
   Check, ChevronUp, LayoutGrid, List, X,
 } from "lucide-react";
 import { whatsappLink, detectarConflitos, mesDeISO, diaDeISO } from "../lib/escala";
+import { useIsMobile } from "../lib/useMedia";
 
 const KEY_FUNCOES     = "escala_funcoes";
 const KEY_FORNECED    = "escala_fornecedores";
@@ -50,7 +51,9 @@ export default function Escala({ onBack, T, darkMode, setDarkMode }) {
   const [alocacoes, setAlocacoesRaw]         = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const [view, setView]             = useState("semana"); // semana | mes | dia
+  const isMobile = useIsMobile();
+  const padX = isMobile ? 14 : 32;
+  const [view, setView]             = useState(isMobile ? "dia" : "semana"); // semana | mes | dia
   const [dataRef, setDataRef]       = useState(hojeISO);
   const [filtroGrupo, setFiltroGrupo] = useState("transmissao");
   const [densidade, setDensidade]   = useState("confortavel"); // compacto | confortavel
@@ -157,16 +160,25 @@ export default function Escala({ onBack, T, darkMode, setDarkMode }) {
 
   return (
     <div style={{minHeight:"100vh",background:T.bg,color:T.text,display:"flex"}}>
-      {/* ── Sidebar ─────────────────────────────────────────────────────── */}
-      <aside style={sidebarStyle(T)}>
-        <button onClick={onBack} title="Voltar" style={backBtn()}><ArrowLeft size={18} strokeWidth={2.25}/></button>
-        <div style={{flex:1}}/>
-        <IconButton icon={darkMode ? Sun : Moon} onClick={()=>setDarkMode(d=>!d)} size={40} T={T}/>
-      </aside>
+      {/* ── Sidebar (desktop) ───────────────────────────────────────────── */}
+      {!isMobile && (
+        <aside style={sidebarStyle(T)}>
+          <button onClick={onBack} title="Voltar" style={backBtn()}><ArrowLeft size={18} strokeWidth={2.25}/></button>
+          <div style={{flex:1}}/>
+          <IconButton icon={darkMode ? Sun : Moon} onClick={()=>setDarkMode(d=>!d)} size={40} T={T}/>
+        </aside>
+      )}
 
       <div style={{flex:1, minWidth:0, paddingBottom:40}}>
+        {isMobile && (
+          <div style={mobileBarStyle(T)}>
+            <button onClick={onBack} title="Voltar" style={mobileBackBtn()}><ArrowLeft size={18} strokeWidth={2.25}/></button>
+            <div style={{flex:1}}/>
+            <IconButton icon={darkMode ? Sun : Moon} onClick={()=>setDarkMode(d=>!d)} size={38} T={T}/>
+          </div>
+        )}
         {/* Header */}
-        <div style={{background:T.surface, borderBottom:`1px solid ${T.border}`, padding:"20px 32px"}}>
+        <div style={{background:T.surface, borderBottom:`1px solid ${T.border}`, padding:`${isMobile?14:20}px ${padX}px`}}>
           <div style={{display:"flex", justifyContent:"space-between", alignItems:"flex-start", gap:16, flexWrap:"wrap"}}>
             <div style={{display:"flex", gap:14, alignItems:"center"}}>
               <div style={{
@@ -232,7 +244,7 @@ export default function Escala({ onBack, T, darkMode, setDarkMode }) {
         </div>
 
         {/* Conteúdo conforme view */}
-        <div style={{padding:"24px 32px"}}>
+        <div style={{padding:`${isMobile?16:24}px ${padX}px`}}>
           {alocacoes.length === 0 && view === "semana" && (
             <Card T={T} style={{marginBottom:24}}>
               <EmptyState T={T} icon={Upload}
@@ -793,6 +805,17 @@ const Loading = ({T}) => (
     <p style={{color:T.textMd,fontSize:16}}>Carregando...</p>
   </div>
 );
+const mobileBarStyle = (T) => ({
+  position:"sticky", top:0, zIndex:20,
+  background: T.gradSidebar, borderBottom:`1px solid rgba(255,255,255,0.06)`,
+  padding:"8px 12px", display:"flex", alignItems:"center", gap:8,
+});
+const mobileBackBtn = () => ({
+  width:40, height:40, borderRadius:10, border:"none", cursor:"pointer",
+  background:"linear-gradient(135deg,#059669,#10b981)",
+  color:"#fff", display:"flex", alignItems:"center", justifyContent:"center",
+  boxShadow:"0 4px 12px rgba(16,185,129,0.35)",
+});
 const sidebarStyle = (T) => ({
   width:72, minHeight:"100vh", background: T.gradSidebar,
   borderRight:"1px solid rgba(255,255,255,0.06)",

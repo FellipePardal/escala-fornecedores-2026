@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { DARK, LIGHT, LS_DARK, LS_AUTH, ACCESS_PIN, APP_NAME } from "./constants";
 import { lsGet, lsSet } from "./utils";
 import { Lock } from "lucide-react";
@@ -7,6 +7,7 @@ import Escala from "./components/Escala";
 import Fornecedores from "./components/Fornecedores";
 import Analise from "./components/Analise";
 import ImportCSV from "./components/ImportCSV";
+import { ToastProvider } from "./components/ui/Toast";
 
 function LoginGate({ onAuth, T }) {
   const [pin, setPin]   = useState("");
@@ -79,14 +80,40 @@ export default function App() {
     setDarkMode(next); lsSet(LS_DARK, next);
   };
 
-  if (!authed) return <LoginGate onAuth={() => setAuthed(true)} T={T}/>;
+  // ─── Atalhos globais ─────────────────────────────────────────────────────
+  useEffect(() => {
+    if (!authed) return;
+    const handler = e => {
+      if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA" || e.target.tagName === "SELECT") return;
+      if (e.ctrlKey || e.metaKey || e.altKey) return;
+      const k = e.key.toLowerCase();
+      if (k === "g") setPagina("escala");
+      else if (k === "f") setPagina("fornecedores");
+      else if (k === "a") setPagina("analise");
+      else if (k === "i") setPagina("import");
+      else if (k === "h" || e.key === "Escape") setPagina("home");
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [authed]);
 
   const common = { onBack: () => setPagina("home"), T, darkMode, setDarkMode: toggleDark };
 
-  if (pagina === "escala")       return <Escala {...common}/>;
-  if (pagina === "fornecedores") return <Fornecedores {...common}/>;
-  if (pagina === "analise")      return <Analise {...common}/>;
-  if (pagina === "import")       return <ImportCSV {...common}/>;
+  if (!authed) {
+    return (
+      <ToastProvider T={T}>
+        <LoginGate onAuth={() => setAuthed(true)} T={T}/>
+      </ToastProvider>
+    );
+  }
 
-  return <Home onEnter={setPagina} T={T} darkMode={darkMode} setDarkMode={toggleDark}/>;
+  return (
+    <ToastProvider T={T}>
+      {pagina === "escala"       && <Escala {...common}/>}
+      {pagina === "fornecedores" && <Fornecedores {...common}/>}
+      {pagina === "analise"      && <Analise {...common}/>}
+      {pagina === "import"       && <ImportCSV {...common}/>}
+      {pagina === "home"         && <Home onEnter={setPagina} T={T} darkMode={darkMode} setDarkMode={toggleDark}/>}
+    </ToastProvider>
+  );
 }
